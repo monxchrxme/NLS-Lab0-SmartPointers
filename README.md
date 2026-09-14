@@ -273,9 +273,7 @@ custom::SmrtPtr                  8 B       2000000      28000000 B    127628.4  
 * **Количество аллокаций:** $\text{Allocs} = 2N$
 
   $$
-
   \text{Allocs} = \underbrace{N}_{\text{new int}} + \underbrace{N}_{\text{new size\_t}}
-  
   $$
 
 * **Память в куче:** $\text{Heap} = N \times (4\text{ B} + 8\text{ B}) = \mathbf{12\,000\text{ B}}$ (при $N=1\,000$)
