@@ -130,8 +130,8 @@ concept ConvertibleToPointer = std::convertible_to<From*, To*>;
 
 * **Фабричная функция `MakeShrd` (аналог `std::make_shared`):**
   Устраняет необходимость явного вызова `new` и дублирования типов. На основе C++20 концептов реализованы две специализированные перегрузки:
-  1. *Для одиночных объектов:* `MakeShrd<T>(args...)` с ограничением `!std::is_array_v<T>` — использует Variadic Templates и Perfect Forwarding (`std::forward<Args>`) для прямой пересылки параметров в конструктор `T`.
-  2. *Для динамических массивов:* `MakeShrd<T[]>(size)` с ограничением `std::is_unbounded_array_v<T>` — автоматически выводит базовый тип через `std::remove_extent_t<T>` и гарантирует обнуление памяти при инициализации (`new ElementType[size]()`).
+  * *Для одиночных объектов:* `MakeShrd<T>(args...)` с ограничением `!std::is_array_v<T>` — использует Variadic Templates и Perfect Forwarding (`std::forward<Args>`) для прямой пересылки параметров в конструктор `T`.
+  * *Для динамических массивов:* `MakeShrd<T[]>(size)` с ограничением `std::is_unbounded_array_v<T>` — автоматически выводит базовый тип через `std::remove_extent_t<T>` и гарантирует обнуление памяти при инициализации (`new ElementType[size]()`).
 
 
 ### 4. Централизованное хранилище: `SmrtPtr<T>` и `CentralStorage`
@@ -297,7 +297,7 @@ custom::SmrtPtr                  8 B       2000000      28000000 B    127628.4  
 ---
 
 #### 4. `std::make_shared` (Оптимизированная фабрика STL)
-* **Количество аллокаций:** $\text{Allocs} = N$ (в 2 раза меньше, чем у обычного `shared_ptr`!)
+* **Количество аллокаций:** $\text{Allocs} = N$ (в 2 раза меньше, чем у обычного `shared_ptr`)
 * **Память в куче:** $\text{Heap} = N \times 24\text{ B} = \mathbf{24\,000\text{ B}}$ (при $N=1\,000$)
 * **Архитектурное обоснование:**
   Фабрика `std::make_shared` устраняет главную проблему `shared_ptr` — двойную аллокацию.
