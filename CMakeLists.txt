@@ -5,18 +5,32 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# # Флаги компилятора
-# add_compile_options(
-#     -Wall 
-#     -Wextra 
-#     -Wpedantic 
-# )
-
-if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR NOT CMAKE_BUILD_TYPE)
-    message(STATUS "Build type: DEBUG (ASan & UBSan enabled)")
-    add_compile_options(-fsanitize=address,undefined -g)
-    add_link_options(-fsanitize=address,undefined)
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build" FORCE)
 endif()
+
+# Флаги компилятора
+add_compile_options(
+    -Wall 
+    -Wextra 
+    -Wpedantic 
+)
+
+# =========================================================================
+# Конфигурация санитайзеров (ASan + UBSan)
+# Включается ТОЛЬКО для профиля Debug
+# Для Valgrind собираем в RelWithDebInfo, где санитайзеры отключены
+# =========================================================================
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    message(STATUS ">>> Build type: DEBUG (ASan & UBSan enabled for all targets)")
+    # -fno-omit-frame-pointer нужен для идеального стектрейса в отчетах ASan
+    add_compile_options(-fsanitize=address,undefined -g -fno-omit-frame-pointer)
+    add_link_options(-fsanitize=address,undefined)
+else()
+    message(STATUS ">>> Build type: ${CMAKE_BUILD_TYPE} (Sanitizers disabled)")
+endif()
+
 
 # Папка с заголовочными файлами
 include_directories(include)
@@ -47,6 +61,7 @@ add_executable(unit_tests
     src/CentralStorage.cpp
 )
 target_link_libraries(unit_tests PRIVATE gtest_main)
+add_test(NAME AllUnitTests COMMAND unit_tests)
 
 
 # Модуль нагрузочных тестов (бенчмарки)

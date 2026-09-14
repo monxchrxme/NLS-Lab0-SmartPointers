@@ -2,6 +2,9 @@
 # CMake & Build Artifacts 
 # =============================================================================
 build/
+build-asan/
+build-valgrind/
+build-release/
 build-*/
 cmake-build-*/
 bin/

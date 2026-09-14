@@ -8,40 +8,105 @@
 
 ### 1. Сборка проекта
 
-**Режим Debug (с включенным AddressSanitizer для отлова ошибок памяти):**
+Проект поддерживает 3 независимых сценария сборки в системе CMake:
+1. **Сценарий 1 (ASan + UBSan):** Компиляторная проверка на утечки памяти, ошибки обращения к куче и UB в реальном времени (macOS / Linux).
+2. **Сценарий 2 (Valgrind Memcheck):** Глубокий бинарный анализ каждого байта в виртуальной машине Valgrind (Linux / Ubuntu).
+3. **Сценарий 3 (Release `-O3`):** Максимальная оптимизация для замера реальной скорости выполнения без накладных расходов.
 
+> **Важное техническое примечание:** 
+> Запуск Valgrind поверх бинарника, собранного с AddressSanitizer (`-fsanitize=address`), **недопустим**, так как оба инструмента перехватывают вызовы `malloc`/`free` и конфликтуют в рантайме. Поэтому профили сборки строго разделены на уровне `CMakeLists.txt`.
+
+
+### Сценарий 1. Проверка через Санитайзеры (AddressSanitizer + UBSan)
+*Кроссплатформенно: работает нативно как на macOS (Apple Silicon / Intel), так и на Linux.*
+
+Профиль `Debug` компилирует проект с флагами `-fsanitize=address,undefined -g -fno-omit-frame-pointer`. Это позволяет мгновенно поймать:
+* Утечки памяти (Memory Leaks);
+* Использование памяти после освобождения (Use-After-Free);
+* Двойное освобождение памяти (Double Free);
+* Выход за границы буфера на стеке и в куче (Buffer Overflow);
+* Любое неопределенное поведение (разыменование nullptr, целочисленное переполнение).
+
+#### 1. Конфигурация и компиляция:
 ```bash
-cmake -B build -DCMAKE_BUILD_TYPE=Debug
-cmake --build build --config Debug
+cmake -B build-asan -DCMAKE_BUILD_TYPE=Debug
+cmake --build build-asan
 ```
 
-Режим Release (с оптимизациями -O3 для нагрузочных бенчмарков):
-
+#### 2. Запуск:
 ```bash
-cmake -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build --condig Release
+./build-asan/unit_tests
+./build-asan/benchmarks
 ```
+
+### Сценарий 2. Проверка через Valgrind Memcheck
+*Выполняется на платформе Linux.*
+
+Профиль `RelWithDebInfo` компилирует проект с отладочными символами (`-g`) для вывода точных номеров строк, но **без флагов санитайзеров**, гарантируя 100% совместимость с виртуальной машиной Valgrind.
+
+#### 1. Конфигурация и компиляция:
+```bash
+cmake -B build-valgrind -DCMAKE_BUILD_TYPE=RelWithDebInfo
+cmake --build build-valgrind
+```
+
+#### 2. Запуск проверки под контролем Valgrind:
+
+**А. Проверка модульных тестов:**
+```bash
+valgrind --leak-check=full \
+         --show-leak-kinds=all \
+         --track-origins=yes \
+         ./build-valgrind/unit_tests
+```
+
+**Б. Проверка нагрузочных тестов (бенчмарков):**
+```bash
+valgrind --leak-check=full \
+         --show-leak-kinds=all \
+         ./build-valgrind/benchmarks
+```
+
+### Сценарий 3. Релизный режим и Бенчмаркинг (Release `-O3`)
+*Кроссплатформенно: macOS / Linux.*
+
+Профиль `Release` включает максимальную оптимизацию компилятора (`-O3`), отключает все санитайзеры и отладочные макросы (`-DNDEBUG`).
+
+#### 1. Конфигурация и компиляция:
+```bash
+cmake -B build-release -DCMAKE_BUILD_TYPE=Release
+cmake --build build-release
+```
+
+#### 2. Запуск:
+```bash
+./build-release/unit_tests
+./build-release/benchmarks
+```
+
 
 ### 2. Запуск модульных тестов (Google Test)
+для режима Release
 
 ```bash
 # Запуск полного набора unit-тестов (22 теста)
-./build/unit_tests
+./build-release/unit_tests
 
 # Запуск с фильтрацией по конкретному модулю
-./build/unit_tests --gtest_filter="UnqPtrTest.*"
-./build/unit_tests --gtest_filter="ShrdPtrTest.*"
-./build/unit_tests --gtest_filter="SequenceTest.*"
-./build/unit_tests --gtest_filter="SmrtPtrTest.*"
-./build/unit_tests --gtest_filter="MemorySpanTest.*"
-./build/unit_tests --gtest_filter="MsPtrTest.*"
+./build-release/unit_tests --gtest_filter="UnqPtrTest.*"
+./build-release/unit_tests --gtest_filter="ShrdPtrTest.*"
+./build-release/unit_tests --gtest_filter="SequenceTest.*"
+./build-release/unit_tests --gtest_filter="SmrtPtrTest.*"
+./build-release/unit_tests --gtest_filter="MemorySpanTest.*"
+./build-release/unit_tests --gtest_filter="MsPtrTest.*"
 ```
 
 ### 3. Запуск бенчмарков и построение графиков
+для режима Release
 
 ```bash
 # Запуск C++ бенчмарка (генерация консольной таблицы и benchmark_results.csv)
-./build/benchmarks
+./build-release/benchmarks
 
 # Автоматическая генерация аналитического дашборда на Python (через uv):
 uv run --with pandas --with matplotlib python scripts/plot_benchmarks.py
