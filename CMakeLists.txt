@@ -5,14 +5,18 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Флаги компилятора
-add_compile_options(
-    -Wall 
-    -Wextra 
-    -Wpedantic 
-    -fsanitize=address
-)
-add_link_options(-fsanitize=address)
+# # Флаги компилятора
+# add_compile_options(
+#     -Wall 
+#     -Wextra 
+#     -Wpedantic 
+# )
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR NOT CMAKE_BUILD_TYPE)
+    message(STATUS "Build type: DEBUG (ASan & UBSan enabled)")
+    add_compile_options(-fsanitize=address,undefined -g)
+    add_link_options(-fsanitize=address,undefined)
+endif()
 
 # Папка с заголовочными файлами
 include_directories(include)

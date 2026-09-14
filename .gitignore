@@ -22,7 +22,6 @@ compile_commands.json
 # Исполняемые файлы проекта
 smart_pointers_demo
 unit_tests
-benchmarks
 
 # =============================================================================
 # macOS System Files 
