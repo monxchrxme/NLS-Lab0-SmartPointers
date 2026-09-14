@@ -32,8 +32,8 @@ FetchContent_MakeAvailable(googletest)
 
 # Основная программа
 add_executable(main
-    main.cpp
     src/CentralStorage.cpp
+    main.cpp
 )
 
 # Модульные тесты на Google Test
