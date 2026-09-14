@@ -12,14 +12,14 @@
 
 ```bash
 cmake -B build -DCMAKE_BUILD_TYPE=Debug
-cmake --build build
+cmake --build build --config Debug
 ```
 
 Режим Release (с оптимизациями -O3 для нагрузочных бенчмарков):
 
 ```bash
 cmake -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build
+cmake --build build --condig Release
 ```
 
 ### 2. Запуск модульных тестов (Google Test)
