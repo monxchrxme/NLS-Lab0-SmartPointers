@@ -254,8 +254,8 @@ custom::SmrtPtr                  8 B       2000000      28000000 B    127628.4  
 | **Raw Pointer** | $N$ | $N \times \text{sizeof}(T)$ | $4\text{ B}$ |
 | **`custom::UnqPtr`** | $N$ | $N \times \text{sizeof}(T)$ | $4\text{ B}$ |
 | **`std::unique_ptr`** | $N$ | $N \times \text{sizeof}(T)$ | $4\text{ B}$ |
-| **`custom::ShrdPtr`** | $2N$ | $N \times (\text{sizeof}(T) + \text{sizeof}(\text{size\_t}))$ | $12\text{ B}$ |
-| **`std::shared_ptr (new)`** | $2N$ | $N \times (\text{sizeof}(T) + \text{sizeof}(\text{ControlBlock}_{new}))$ | $28\text{ B}$ |
+| **`custom::ShrdPtr`** | $2N$ | $N \times (\text{sizeof}(T) + \text{sizeof}(\text{size}\_\text{t}))$ | $12\text{ B}$ |
+| **`std::shared_ptr (new)`** | $2N$ | $N \times (\text{sizeof}(T) + \text{sizeof}(\text{ControlBlock}_{\text{new}}))$ | $28\text{ B}$ |
 | **`std::make_shared`** | $N$ | $N \times \text{sizeof}(\text{CombinedBlock})$ | $24\text{ B}$ |
 | **`custom::SmrtPtr`** | $2N$ | $N \times (\text{sizeof}(T) + \text{sizeof}(\text{HashNode}))$ | $28\text{ B}$ |
 
